@@ -89,7 +89,7 @@ function render(){
     } else {
       var nw=d.theory.slice((WEEK-1)*PER_WEEK,UNLOCKED);
       var older=d.theory.slice(0,Math.max(0,(WEEK-1)*PER_WEEK));
-      var rv=win(older,mod(ORD,older.length),N_REVIEW);
+      var rv=win(older,mod(ORD*N_REVIEW,older.length),N_REVIEW);
       h=nw.length?('<div class="sec">今週の新規（毎日やる）</div>'
         +nw.map(function(o){return card(o,'new','<span class="tag n">NEW</span>');}).join(''))
         :'<div class="note">収録済みの理論をすべて解禁しました。content.py に題を追加すると、この先の週に自動で割り当てられます。</div>';
@@ -98,7 +98,7 @@ function render(){
     }
   } else {
     var arr=d[tab], n={bt4:N_BT4,keisan:N_KEISAN,kaisei:N_KAISEI}[tab];
-    var pick=showAll?arr:win(arr,mod(ORD,arr.length),n);
+    var pick=showAll?arr:win(arr,mod(ORD*n,arr.length),n);
     h=pick.map(function(o){return card(o);}).join('');
   }
   document.getElementById('app').innerHTML=h||'<div class="empty">項目がありません</div>';
