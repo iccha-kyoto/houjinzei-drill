@@ -40,6 +40,11 @@ def win(arr, off, n):
     return [arr[(off + i) % len(arr)] for i in range(min(n, len(arr)))]
 
 
+# オフセットは ordn（経過日数）に n を掛けて進める。単純に ordn をそのまま使うと
+# 窓が1個ずつしかずれず、前日との重複が n-1 個も残って「昨日と同じ」に見えてしまう。
+# n個ずつ進めることで日毎に重複なく巡回する。
+
+
 def main(today=None):
     today = today or datetime.date.today()
     ordn = (today - EPOCH).days
@@ -53,11 +58,11 @@ def main(today=None):
     unlocked = min(week * PER_WEEK, len(THEORY)) if week else 0
     new_items = THEORY[(week - 1) * PER_WEEK:unlocked] if week else []
     older = THEORY[:max(0, (week - 1) * PER_WEEK)]
-    review = win(older, ordn % len(older), N_REVIEW) if older else []
+    review = win(older, (ordn * N_REVIEW) % len(older), N_REVIEW) if older else []
 
-    bt4 = win(BT4, ordn % len(BT4), N_BT4)
-    keisan = win(KEISAN, ordn % len(KEISAN), N_KEISAN)
-    kaisei = win(KAISEI, ordn % len(KAISEI), N_KAISEI)
+    bt4 = win(BT4, (ordn * N_BT4) % len(BT4), N_BT4)
+    keisan = win(KEISAN, (ordn * N_KEISAN) % len(KEISAN), N_KEISAN)
+    kaisei = win(KAISEI, (ordn * N_KAISEI) % len(KAISEI), N_KAISEI)
 
     if week:
         label = f"第{week}週・理論{unlocked}/{len(THEORY)}題"
