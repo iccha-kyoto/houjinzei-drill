@@ -73,6 +73,7 @@ main{padding:14px 12px 60px;max-width:760px;margin:0 auto}
 .b{background:#1b1f24;color:transparent;border-radius:3px;padding:0 3px;cursor:pointer;
  transition:background .12s;user-select:none}
 .b.on{background:#fff3c9;color:#1b1f24}
+.card.bt4 .b{display:inline-block;width:4.6em;text-align:center}
 .sec{font-size:12px;font-weight:700;color:#6b7684;margin:18px 2px 8px}
 .sec:first-child{margin-top:0}
 .note{font-size:12px;color:#6b7684;padding:10px 14px;background:#eef1f4;border-radius:10px;margin-bottom:14px}
@@ -148,7 +149,7 @@ function render(){
   } else {
     var arr=d[tab], n={bt4:N_BT4,keisan:N_KEISAN,kaisei:N_KAISEI}[tab];
     var pick=showAll?arr:win(arr,mod(ORD,arr.length),n);
-    h=pick.map(function(o){return card(o);}).join('');
+    h=pick.map(function(o){return card(o, tab==='bt4'?'bt4':'');}).join('');
   }
   document.getElementById('app').innerHTML=h||'<div class="empty">項目がありません</div>';
 }
