@@ -49,6 +49,8 @@ def build_message(d):
 
     lines.append(f"📋 *別表四の判定*：{j(d['bt4_titles'])}")
     lines.append(f"🧮 *計算*：{j(d['keisan_titles'])}")
+    if d.get("enshu_titles"):
+        lines.append(f"✏️ *演習*：{j(d['enshu_titles'])}")
     lines.append(f"⚡ *改正・新論点*：{j(d['kaisei_titles'])}")
     lines.append("")
     lines.append("📱 ドリル（スマホ可・4タブ／墨消しタップ／「全範囲を表示」も可）")

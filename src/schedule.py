@@ -20,7 +20,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from content import THEORY, BT4, KEISAN, KAISEI  # noqa: E402
+from content import THEORY, BT4, KEISAN, KAISEI, ENSHU  # noqa: E402
 
 EPOCH = datetime.date(1970, 1, 1)
 START = datetime.date(2026, 8, 31)  # 学習開始（月曜）。教材2027年度版は8/29入手、9/1着手予定
@@ -31,6 +31,7 @@ N_REVIEW = 4      # 既習分から毎日回す題数
 N_BT4 = 6         # 別表四カードの1日あたり枚数
 N_KEISAN = 2
 N_KAISEI = 1
+N_ENSHU = 1      # 演習（数値の計算問題）の1日あたり問数
 
 
 def win(arr, off, n):
@@ -58,6 +59,7 @@ def main(today=None):
     bt4 = win(BT4, ordn % len(BT4), N_BT4)
     keisan = win(KEISAN, ordn % len(KEISAN), N_KEISAN)
     kaisei = win(KAISEI, ordn % len(KAISEI), N_KAISEI)
+    enshu = win(ENSHU, ordn % len(ENSHU), N_ENSHU)
 
     if week:
         label = f"第{week}週・理論{unlocked}/{len(THEORY)}題"
@@ -77,6 +79,7 @@ def main(today=None):
         "bt4_titles": [b[0] for b in bt4],
         "keisan_titles": [k[0] for k in keisan],
         "kaisei_titles": [k[0] for k in kaisei],
+        "enshu_titles": [e[0] for e in enshu],
     }
 
 

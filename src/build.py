@@ -14,7 +14,7 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from content import THEORY, BT4, KEISAN, KAISEI  # noqa: E402
+from content import THEORY, BT4, KEISAN, KAISEI, ENSHU  # noqa: E402
 import schedule  # noqa: E402
 
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -42,6 +42,7 @@ DATA = {
     "theory": [{"title": t, "art": a, "pillars": pack_pillars(p)} for t, a, p in THEORY],
     "bt4": [{"title": t, "seg": seg(s)} for t, s in BT4],
     "keisan": [{"title": t, "seg": seg(s)} for t, s in KEISAN],
+    "enshu": [{"title": t, "q": q, "a": a} for t, q, a in ENSHU],
     "kaisei": [{"title": t, "art": a, "pillars": pack_pillars(p)} for t, a, p in KAISEI],
 }
 
@@ -78,6 +79,14 @@ main{padding:14px 12px 60px;max-width:760px;margin:0 auto}
 .sec:first-child{margin-top:0}
 .note{font-size:12px;color:#6b7684;padding:10px 14px;background:#eef1f4;border-radius:10px;margin-bottom:14px}
 .empty{font-size:13px;color:#6b7684;padding:18px;text-align:center}
+.card.enshu h2{margin-bottom:8px}
+.card.enshu .q{white-space:pre-wrap;font-size:13px;line-height:1.72;background:#fbfcfd;
+ border:1px solid #e3e7ec;border-radius:8px;padding:11px 12px;margin:0 0 10px;overflow-x:auto}
+.card.enshu .reveal{border:0;border-radius:999px;padding:7px 16px;font-size:13px;font-weight:700;
+ background:#12324f;color:#fff;cursor:pointer}
+.card.enshu .a{white-space:pre-wrap;font-size:12.5px;line-height:1.75;background:#eef6ef;
+ border:1px solid #cfe3d2;border-radius:8px;padding:11px 12px;margin:10px 0 0;overflow-x:auto;
+ font-family:ui-monospace,SFMono-Regular,Menlo,"Hiragino Sans",monospace}
 """
 
 HTML = """<!doctype html>
@@ -94,6 +103,7 @@ HTML = """<!doctype html>
     <button role="tab" data-t="theory" aria-selected="true">理論</button>
     <button role="tab" data-t="bt4" aria-selected="false">別表四</button>
     <button role="tab" data-t="keisan" aria-selected="false">計算</button>
+    <button role="tab" data-t="enshu" aria-selected="false">演習</button>
     <button role="tab" data-t="kaisei" aria-selected="false">改正・新論点</button>
   </nav>
 </header>
@@ -107,7 +117,7 @@ HTML = """<!doctype html>
 <script>
 var DATA=__DATA__;
 var START=Date.UTC(2026,7,31)/86400000, EXAM=Date.UTC(2027,7,4)/86400000;
-var PER_WEEK=2, N_REVIEW=4, N_BT4=6, N_KEISAN=2, N_KAISEI=1;
+var PER_WEEK=2, N_REVIEW=4, N_BT4=6, N_KEISAN=2, N_KAISEI=1, N_ENSHU=1;
 var showAll=false, tab='theory';
 
 function ordToday(){var d=new Date();return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000);}
@@ -124,6 +134,11 @@ function segHTML(sg){return sg.map(function(s){
   return s.b!==undefined?'<span class="b">'+esc(s.b)+'</span>':esc(s.t);}).join('');}
 function pillarsHTML(ps){return ps.map(function(p){
   return '<div class="p"><span class="l">'+esc(p.l)+'</span><span class="x">'+segHTML(p.seg)+'</span></div>';}).join('');}
+function enshuCard(o){
+  return '<div class="card enshu"><h2>'+esc(o.title)+'</h2>'
+    +'<div class="q">'+esc(o.q)+'</div>'
+    +'<button class="reveal">解答を見る</button>'
+    +'<div class="a" hidden>'+esc(o.a)+'</div></div>';}
 function card(o,cls,tag){
   return '<div class="card'+(cls?' '+cls:'')+'">'+(tag||'')+'<h2>'+esc(o.title)+'</h2>'
     +(o.art?'<div class="art">'+esc(o.art)+'</div>':'')
@@ -146,6 +161,9 @@ function render(){
       if(rv.length) h+='<div class="sec">復習（既習分から巡回）</div>'
         +rv.map(function(o){return card(o,'','<span class="tag r">復習</span>');}).join('');
     }
+  } else if(tab==='enshu'){
+    var ea=d.enshu;
+    h=(showAll?ea:win(ea,mod(ORD,ea.length),N_ENSHU)).map(enshuCard).join('');
   } else {
     var arr=d[tab], n={bt4:N_BT4,keisan:N_KEISAN,kaisei:N_KAISEI}[tab];
     var pick=showAll?arr:win(arr,mod(ORD,arr.length),n);
@@ -164,11 +182,18 @@ document.querySelectorAll('.tabs button').forEach(function(b){
     b.setAttribute('aria-selected','true'); tab=b.dataset.t; render();});
 });
 document.getElementById('app').addEventListener('click',function(e){
-  if(e.target.classList.contains('b')) e.target.classList.toggle('on');});
+  if(e.target.classList.contains('b')) e.target.classList.toggle('on');
+  if(e.target.classList.contains('reveal')){
+    var a=e.target.nextElementSibling; a.hidden=!a.hidden;
+    e.target.textContent=a.hidden?'解答を見る':'解答を隠す';}});
 document.getElementById('revealAll').addEventListener('click',function(){
-  document.querySelectorAll('.b').forEach(function(x){x.classList.add('on');});});
+  document.querySelectorAll('.b').forEach(function(x){x.classList.add('on');});
+  document.querySelectorAll('.card.enshu .a').forEach(function(x){x.hidden=false;});
+  document.querySelectorAll('.card.enshu .reveal').forEach(function(x){x.textContent='解答を隠す';});});
 document.getElementById('hideAll').addEventListener('click',function(){
-  document.querySelectorAll('.b').forEach(function(x){x.classList.remove('on');});});
+  document.querySelectorAll('.b').forEach(function(x){x.classList.remove('on');});
+  document.querySelectorAll('.card.enshu .a').forEach(function(x){x.hidden=true;});
+  document.querySelectorAll('.card.enshu .reveal').forEach(function(x){x.textContent='解答を見る';});});
 document.getElementById('scope').addEventListener('click',function(){
   showAll=!showAll; this.textContent=showAll?'本日の範囲に戻す':'全範囲を表示';
   document.getElementById('scopeLabel').textContent=showAll?'全範囲':''; render();});
@@ -190,7 +215,7 @@ def main():
     n_black = page.count('"b":')
     print(f"[ok] {path}")
     print(f"     理論{len(THEORY)}題 / 別表四{len(BT4)}枚 / 計算{len(KEISAN)}件 / 改正{len(KAISEI)}件"
-          f" / 墨消し{n_black}箇所")
+          f" / 演習{len(ENSHU)}問 / 墨消し{n_black}箇所")
     print(f"     本日: {d['set_label']}　本試験まで{d['days_left']}日")
 
 
